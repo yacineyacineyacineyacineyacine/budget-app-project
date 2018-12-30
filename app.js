@@ -5,13 +5,24 @@ var budgetController = (function(){
       this.id = id;
       this.description = description;
       this.value = value;
+      var totalExpenses = 0;
+      var data = {
+             allItems:{
+                       exp : [],
+                       inc : [],
+             },
+             total:{
+                       exp: 0,
+                       inc: 0,
+                    }
+      };
     };
     var Income = function(id, description, value){
       this.id = id;
       this.description = description;
       this.value = value;
     };
-    var totalExpenses = 0;
+    var totalIncome = 0;
     var data = {
            allItems:{
                      exp : [],
@@ -65,7 +76,7 @@ var uiController = (function(){
        return {
          type : document.querySelector(DOMstrings.inputType).value,//will be either inc or exp
          description : document.querySelector(DOMstrings.inputDescription).value,
-         value : document.querySelector(DOMstrings.inputValue).value,
+         value : parseFloat(document.querySelector(DOMstrings.inputValue).value),
               };
             },
         addListItem: function(obj, type){
@@ -114,21 +125,26 @@ var controller = (function(budgetCtrl, uiCtrl){
   var updateBudget = function(){
     //1. Calculate the Budget
 
-    //2.Display the Budget on the UI
+    //2.Return the budget
+
+    //3.Display the Budget on the UI
   };
 
   var ctrlAddItem = function(){
          var input, newItem;
     // 1. Get the field input data
           input = uiCtrl.getInput();
-   //2. Add the Item to te budget Controller
-          newItem = budgetCtrl.addItem(input.type, input.description, input.value);
-    //3. Add Item to thr UI
-         uiController.addListItem(newItem, input.type);
-    //4. Clear the Fields
-          uiController.clearFields();
-
-  };
+          if (input.description !== "" && !isNaN(input.value) && input.value > 0) {
+            //2. Add the Item to budget Controller
+                   newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+             //3. Add Item to UI
+                  uiController.addListItem(newItem, input.type);
+             //4. Clear Fields
+                   uiController.clearFields();
+             //5.Calculate and Update Budget
+                   updateBudget();
+          }
+   };
   return {
     init: function(){
       console.log("application has started.");
