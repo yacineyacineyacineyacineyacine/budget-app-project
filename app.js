@@ -61,6 +61,8 @@ var budgetController = (function(){
                       if (data.totals.inc > 0) { // we can't devide by zero
                         data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
                         //exp = 100; inc= 200 => percentage = 100/ 200 <==> 1/2  = 0.5 * 100 => spent = 50%
+                      }else{
+                        data.percentage = -1;
                       }
 
       },
@@ -87,6 +89,10 @@ var uiController = (function(){
     inputBtn : '.add__btn',
     incomeContainer: '.income__list',
     expensesContainer:'.expenses__list',
+    budgetLabel:'.budget__value',
+    incomeLabl:'.budget__income--value',
+    expensesLabel:'.budget__expenses--value',
+    percentageLabel :'.budget__expenses--percentage',
   }
 
    return {
@@ -122,6 +128,16 @@ var uiController = (function(){
              });
              fieldsArr[0].focus();
         },
+        displayBudget: function(obj){
+         document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
+         document.querySelector(DOMstrings.incomeLabl).textContent = obj.totalInc;
+         document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+         if (obj.percentage > 0) {
+              document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + ' %';
+         }else {
+               document.querySelector(DOMstrings.percentageLabel).textContent = '__';
+         }
+        },
         getDOMstrings : function(){
         return DOMstrings;
       },
@@ -146,7 +162,7 @@ var controller = (function(budgetCtrl, uiCtrl){
     //2.Return the budget
     var budget = budgetCtrl.getBudget();
     //3.Display the Budget on the UI
-    console.log(budget);
+    uiController.displayBudget(budget);
   };
 
   var ctrlAddItem = function(){
@@ -168,6 +184,12 @@ var controller = (function(budgetCtrl, uiCtrl){
     init: function(){
       console.log("application has started.");
       setUpEventListeners();
+      uiController.displayBudget({
+        budget: 0,
+        totalInc: 0,
+        totalExp: 0,
+        percentage: -1,
+      });
     }
   };
 })(budgetController, uiController);
