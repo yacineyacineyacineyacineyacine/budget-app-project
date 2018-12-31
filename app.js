@@ -5,33 +5,30 @@ var budgetController = (function(){
       this.id = id;
       this.description = description;
       this.value = value;
-      var totalExpenses = 0;
-      var data = {
-             allItems:{
-                       exp : [],
-                       inc : [],
-             },
-             total:{
-                       exp: 0,
-                       inc: 0,
-                    }
       };
-    };
     var Income = function(id, description, value){
       this.id = id;
       this.description = description;
       this.value = value;
-    };
-    var totalIncome = 0;
+      };
+    var calculateTotal = function(type){
+      var sum = 0;
+      data.allItems[type].forEach(function(cur){
+        sum += cur.value;
+      });
+      data.totals[type] = sum;
+      };
     var data = {
            allItems:{
                      exp : [],
                      inc : [],
            },
-           total:{
+           totals:{
                      exp: 0,
                      inc: 0,
-                  }
+                  },
+           budget: 0,
+           percentage:-1
     };
     return {
       addItem: function(type, des, val){
@@ -53,6 +50,27 @@ var budgetController = (function(){
                         data.allItems[type].push(newItem);
                         // return the new element
                         return newItem;
+      },
+      calculateBudget: function(){
+                      //calculate our income and expenses
+                      calculateTotal('exp');
+                      calculateTotal('inc');
+                      //calculate the budgeut : income - expenses
+                      data.budget = data.totals.inc - data.totals.exp;
+                      //calculate the percentage of income that we spent
+                      if (data.totals.inc > 0) { // we can't devide by zero
+                        data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+                        //exp = 100; inc= 200 => percentage = 100/ 200 <==> 1/2  = 0.5 * 100 => spent = 50%
+                      }
+
+      },
+      getBudget: function(){
+                 return{
+                   budget: data.budget,
+                   totalInc: data.totals.inc,
+                   totalExp: data.totals.exp,
+                   percentage: data.percentage,
+                 };
       },
       testing: function(){
         console.log(data);
@@ -124,10 +142,11 @@ var controller = (function(budgetCtrl, uiCtrl){
   };
   var updateBudget = function(){
     //1. Calculate the Budget
-
+    budgetCtrl.calculateBudget();
     //2.Return the budget
-
+    var budget = budgetCtrl.getBudget();
     //3.Display the Budget on the UI
+    console.log(budget);
   };
 
   var ctrlAddItem = function(){
