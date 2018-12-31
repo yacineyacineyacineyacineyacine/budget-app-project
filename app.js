@@ -51,6 +51,16 @@ var budgetController = (function(){
                         // return the new element
                         return newItem;
       },
+      deleteItem:function(type, id){
+                       var index, ids;
+                       ids = data.allItems[type].map(function(current){
+                          return current.id;
+                       });
+                       index = ids.indexOf[id];
+                       if (index !== -1 ) {
+                         data.allItems[type].splice(index, 1);
+                       }
+      },
       calculateBudget: function(){
                       //calculate our income and expenses
                       calculateTotal('exp');
@@ -93,6 +103,7 @@ var uiController = (function(){
     incomeLabl:'.budget__income--value',
     expensesLabel:'.budget__expenses--value',
     percentageLabel :'.budget__expenses--percentage',
+    container : '.container',
   }
 
    return {
@@ -107,10 +118,10 @@ var uiController = (function(){
              var html, element;
              if (type === 'inc') {
                 element = DOMstrings.incomeContainer;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"> <div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"> <div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
              }else if (type === 'exp') {
                element = DOMstrings.expensesContainer;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
              }
              // Replace the placeholder text with some actual data
              newHtml = html.replace('%id%', obj.id);
@@ -118,6 +129,11 @@ var uiController = (function(){
              newHtml = newHtml.replace('%value%', obj.value);
             //Insert the HTML into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+        },
+        deletListItem: function(selectorID){
+                       var el;
+                       el = document.getElementById(selectorID);
+                       el.parentNode.removeChild(el);
         },
         clearFields : function(){
              var fields, fieldsArr;
@@ -154,6 +170,7 @@ var controller = (function(budgetCtrl, uiCtrl){
            ctrlAddItem();
          };
     });
+    document.querySelector(DOM.container).addEventListener('click',ctrlDeleteItem);
 
   };
   var updateBudget = function(){
@@ -179,6 +196,21 @@ var controller = (function(budgetCtrl, uiCtrl){
              //5.Calculate and Update Budget
                    updateBudget();
           }
+   };
+   var ctrlDeleteItem = function(event){
+     var itemid, splitID, type, id;
+      itemid = event.target.parentNode.parentNode.parentNode.parentNode.id;
+      if (itemid) {
+         splitID = itemid.split('-');
+         type = splitID[0];
+         id = parseInt(splitID[1]);
+          //1. Delete the Item From the Data Structer
+          budgetCtrl.deleteItem(type, id);
+         //2. Delete the Item From the UI
+         uiController.deletListItem(itemid);
+         //3. Update and show the new budget
+          updateBudget();
+      }
    };
   return {
     init: function(){
